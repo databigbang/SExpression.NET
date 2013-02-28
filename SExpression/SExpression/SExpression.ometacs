@@ -1,0 +1,23 @@
+﻿using OMetaSharp;
+using System.Collections;
+using System.Text;
+
+ometa SExpression.GeneratedCode.SExpressionParser : Parser {
+	SExpression	= Spaces Atom:a Spaces -> { a }
+				| Spaces List:l Spaces -> { l.As<SExprList>() },
+
+
+	EscapeChar	= '\\' Character:c			-> { c },
+
+	Atom		= String:s -> { new SExprAtomString(s.ToString()) }
+				| Number:n -> { new SExprAtomNumber(n.ToString()) }
+				| Symbol:sy -> { new SExprAtomSymbol(sy.ToString()) },
+
+	Symbol		= FirstAndRest("Letter", "LetterOrDigit") | '+' | '-' | '*' | '/' | '^',
+
+	String		= '"' (EscapeChar | ~'"' Character)*:s '"'	-> { s },
+
+	Number		= Digit+,
+
+	List		= '(' SExpression*:xs ')' -> { new SExprList(xs.ToIEnumerable<ISExpression>()) }
+}
